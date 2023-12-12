@@ -69,7 +69,7 @@
           <p class="mt-6 text-lg leading-8 text-gray-600">An example app to showcase how you can implement building authentication and onboarding with Web5.js SDK using Decentralized Identifiers and Decentralized Web nodes.</p>
           <div class="mt-10 flex items-center justify-center gap-x-6">
             <a href="#"
-              class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Connect with 🔐DIDLogin</a>
+              class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" @click="connectToWeb5">Connect with 🔐DIDLogin</a>
             <a href="https://developer.tbd.website/blog/did-authentication/" class="text-sm font-semibold leading-6 text-gray-900" target="_blank">Learn more <span
                 aria-hidden="true">→</span></a>
           </div>
@@ -176,8 +176,10 @@ import { ref } from 'vue'
 import { Dialog, DialogPanel } from '@headlessui/vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 
+import { Web5 } from '@web5/api/browser';
+
 let web5;
-let loggedInUserDID;
+let loggedInUserDID = ref('');
 let userProfile = ref({
   firstName: '',
   lastName: '',
@@ -200,5 +202,13 @@ const mobileMenuOpen = ref(false)
 
 const verifyEmptyData = (data) => {
   return Object.values(data).some((value) => value === '');
+}
+
+const connectToWeb5 = async () => {
+  alert('Connecting to Web5');
+   ({ web5, did: loggedInUserDID.value } = await Web5.connect());
+  console.log('Our Web5 instance is: ', web5);
+  console.log('Our DID is: ', loggedInUserDID.value);
+
 }
 </script>
