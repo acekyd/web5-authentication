@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white">
-    <header class="absolute inset-x-0 top-0 z-50">
+    <header class="inset-x-0 top-0 z-50">
       <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div class="flex lg:flex-1">
           <a href="#" class="-m-1.5 p-1.5">
@@ -20,7 +20,7 @@
             class="text-sm font-semibold leading-6 text-gray-900">{{ item.name }}</a>
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Log in <span
+          <a href="#" class="text-sm font-semibold leading-6 text-gray-900" v-if="loggedInUserDID" @click="logOut">Log out <span
               aria-hidden="true">&rarr;</span></a>
         </div>
       </nav>
@@ -78,96 +78,130 @@
     </div>
     <!-- End of Section 1 -->
 
-    <!-- Section 2: Show DID and confirm additional personal data from DWN -->
-    <div class="container mx-auto px-4" v-else-if="loggedInUserDID && verifyEmptyData(userProfile)">
-      <form>
-        <div class="space-y-12">
-          <div class="border-b border-gray-900/10 pb-12">
-            <h2 class="text-base font-semibold leading-7 text-gray-900">Personal Information</h2>
-            <p class="mt-1 text-sm leading-6 text-gray-600">Please confirm and update your profile information in your DWN.</p>
+    <!-- Start of logged in section -->
+    <div class="container mx-auto w-1/2" v-else>
+        <!-- Section 2: Show DID and confirm additional personal data from DWN -->
+        <div class="container mx-auto px-4" v-if="isUserProfileEmpty">
+          <form @submit.prevent="updateProfile">
+            <div class="space-y-12">
+              <div class="border-b border-gray-900/10 pb-12">
+                <h2 class="text-base font-semibold leading-7 text-gray-900">Personal Information</h2>
+                <p class="mt-1 text-sm leading-6 text-gray-600">Please confirm and update your profile information in your DWN.</p>
 
-            <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-              <div class="sm:col-span-3">
-                <label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">First name</label>
-                <div class="mt-2">
-                  <input type="text" name="first-name" id="firstName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div class="sm:col-span-3">
+                    <label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">First name</label>
+                    <div class="mt-2">
+                      <input type="text" name="first-name" id="firstName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" v-model="userProfileForm.firstName" required />
+                    </div>
+                  </div>
+
+                  <div class="sm:col-span-3">
+                    <label for="lastName" class="block text-sm font-medium leading-6 text-gray-900">Last name</label>
+                    <div class="mt-2">
+                      <input type="text" name="last-name" id="lastName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" v-model="userProfileForm.lastName" required />
+                    </div>
+                  </div>
+
+                  <div class="sm:col-span-4">
+                    <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
+                    <div class="mt-2">
+                      <input id="email" name="email" type="email" autocomplete="email" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" v-model="userProfileForm.email" required />
+                    </div>
+                  </div>
+
+                  <div class="sm:col-span-2 sm:col-start-1">
+                    <label for="nationality" class="block text-sm font-medium leading-6 text-gray-900">Nationality</label>
+                    <div class="mt-2">
+                      <input type="text" name="nationality" id="nationality" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" v-model="userProfileForm.nationality" required />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="sm:col-span-3">
-                <label for="lastName" class="block text-sm font-medium leading-6 text-gray-900">Last name</label>
-                <div class="mt-2">
-                  <input type="text" name="last-name" id="lastName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                </div>
-              </div>
-
-              <div class="sm:col-span-4">
-                <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-                <div class="mt-2">
-                  <input id="email" name="email" type="email" autocomplete="email" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                </div>
-              </div>
-
-              <div class="sm:col-span-2 sm:col-start-1">
-                <label for="nationality" class="block text-sm font-medium leading-6 text-gray-900">Nationality</label>
-                <div class="mt-2">
-                  <input type="text" name="nationality" id="nationality" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                </div>
-              </div>
             </div>
-          </div>
 
-        </div>
+            <div class="mt-6 flex items-center justify-end gap-x-6">
+              <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+            </div>
+          </form>
+        </div>   <!-- End of Section 2 -->
 
-        <div class="mt-6 flex items-center justify-end gap-x-6">
-          <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
-          <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
-        </div>
-      </form>
-    </div>   <!-- End of Section 2 -->
+          <!-- Section 3: Request app personalization and onboarding specific data -->
+        <div v-else-if="isUserPreferencesEmpty" class="container mx-auto px-4">
+            <form @submit.prevent="updatePreferences">
+              <div class="space-y-12">
+                <div class="border-b border-gray-900/10 pb-12">
+                  <h2 class="text-base font-semibold leading-7 text-gray-900">DIDSocial App Preferences for {{ userProfile.data.firstName }}</h2>
+                  <p class="mt-1 text-sm leading-6 text-gray-600">Configure custom or app specific onboarding experience.</p>
 
-      <!-- Section 3: Request app personalization and onboarding specific data -->
-    <div v-else-if="loggedInUserDID && !verifyEmptyData(userProfile) && verifyEmptyData(userPreferences)" class="container mx-auto px-4">
-        <form>
-          <div class="space-y-12">
-            <div class="border-b border-gray-900/10 pb-12">
-              <h2 class="text-base font-semibold leading-7 text-gray-900">DIDSocial App Preferences for Mr Ace</h2>
-              <p class="mt-1 text-sm leading-6 text-gray-600">Configure custom or app specific onboarding experience.</p>
+                  <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                    <div class="sm:col-span-3">
+                      <label for="workspaceName" class="block text-sm font-medium leading-6 text-gray-900">Workspace name</label>
+                      <div class="mt-2">
+                        <input type="text" name="workspaceName" id="workspaceName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" v-model="userPreferencesForm.workspaceName" required/>
+                      </div>
+                    </div>
 
-              <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div class="sm:col-span-3">
-                  <label for="workspaceName" class="block text-sm font-medium leading-6 text-gray-900">Workspace name</label>
-                  <div class="mt-2">
-                    <input type="text" name="workspaceName" id="workspaceName" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                    <div class="sm:col-span-2 sm:col-start-1">
+                      <label for="colorMode" class="block text-sm font-medium leading-6 text-gray-900">Color Mode</label>
+                        <div class="mt-2">
+                          <select id="colorMode" name="colorMode" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6" v-model="userPreferencesForm.colorMode" required>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                          </select>
+                        </div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="sm:col-span-2 sm:col-start-1">
-                  <label for="colorMode" class="block text-sm font-medium leading-6 text-gray-900">Color Mode</label>
-                    <div class="mt-2">
-                      <select id="colorMode" name="colorMode" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6">
-                        <option>Light</option>
-                        <option>Dark</option>
-                      </select>
-                    </div>
-                </div>
               </div>
+
+              <div class="mt-6 flex items-center justify-end gap-x-6">
+                <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+              </div>
+            </form>
+          </div>
+        <!-- End of Section 3 -->
+
+        <!-- Section 4: Show app specific data -->
+        <div v-else>
+          <small class="text-blue-600">User completely logged in and onboarded.</small>
+          <br />
+          <div>
+            <div class="px-4 sm:px-0">
+              <h3 class="text-base font-semibold leading-7 text-gray-900">Personal Information</h3>
+              <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">Personal and application details.</p>
             </div>
-
+            <div class="mt-6 border-t border-gray-100">
+              <dl class="divide-y divide-gray-100">
+                <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm font-medium leading-6 text-gray-900">Full name</dt>
+                  <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ userProfile.data.firstName }} {{ userProfile.data.lastName }}</dd>
+                </div>
+                <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm font-medium leading-6 text-gray-900">Email address</dt>
+                  <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ userProfile.data.email }}</dd>
+                </div>
+                <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                    <dt class="text-sm font-medium leading-6 text-gray-900">Nationality</dt>
+                    <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ userProfile.data.nationality }}</dd>
+                  </div>
+                <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm font-medium leading-6 text-gray-900">Workspace</dt>
+                  <dd class="mt-1 text-sm leading-6 text-blue-700 sm:col-span-2 sm:mt-0">{{ userPreferences.data.workspaceName }}</dd>
+                </div>
+                <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                  <dt class="text-sm font-medium leading-6 text-gray-900">Color mode</dt>
+                  <dd class="mt-1 text-sm leading-6 text-blue-700 sm:col-span-2 sm:mt-0">{{ userPreferences.data.colorMode }}</dd>
+                </div>
+              </dl>
+            </div>
           </div>
-
-          <div class="mt-6 flex items-center justify-end gap-x-6">
-            <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
-            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
-          </div>
-        </form>
-      </div>
-    <!-- End of Section 3 -->
-    <!-- Section 4: Show app specific data -->
-    <div v-else>
-      User completely logged in and onboarded.
+        </div>
+        <!-- End of Section 4 -->
     </div>
-    <!-- End of Section 4 -->
+    <!-- End of logged in section -->
   </div>
 </template>
 
@@ -176,20 +210,23 @@ import { ref } from 'vue'
 import { Dialog, DialogPanel } from '@headlessui/vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 
-import { Web5 } from '@web5/api/browser';
+import { Web5 } from '@web5/api';
 
 let web5;
 let loggedInUserDID = ref('');
-let userProfile = ref({
+let userProfileForm = ref({
   firstName: '',
   lastName: '',
   email: '',
   nationality: '',
 });
-let userPreferences = ref({
+let userPreferencesForm = ref({
   workspaceName: '',
   colorMode: '',
 });
+
+let userProfile = ref({});
+let userPreferences = ref({});
 
 const navigation = [
   { name: 'Product', href: '#' },
@@ -201,14 +238,167 @@ const navigation = [
 const mobileMenuOpen = ref(false)
 
 const verifyEmptyData = (data) => {
-  return Object.values(data).some((value) => value === '');
+  console.log('Data is: ', data);
+  const isEmpty = Object.keys(data).length === 0
+  console.log('isEmpty is: ', isEmpty);
+  return isEmpty;
 }
 
+onBeforeMount(async () => {
+  const web5loggedInUserDID = localStorage.getItem('web5loggedInUserDID');
+  if (web5loggedInUserDID) {
+    loggedInUserDID.value = web5loggedInUserDID;
+    await connectToWeb5();
+  }
+});
+
 const connectToWeb5 = async () => {
-  alert('Connecting to Web5');
+  //alert('Connecting to Web5');
    ({ web5, did: loggedInUserDID.value } = await Web5.connect());
   console.log('Our Web5 instance is: ', web5);
   console.log('Our DID is: ', loggedInUserDID.value);
 
+  getUserProfile();
+  getUserPreferences();
+
+  localStorage.setItem('web5loggedInUserDID', loggedInUserDID.value);
+
 }
+
+const getUserProfile = async () => {
+
+  const { records } = await web5.dwn.records.query({
+    message: {
+      filter: {
+        schema: "http://schema.org/Person",
+      }
+    }
+  })
+
+  console.log('Records are: ', records);
+
+  console.log('Records length is: ', records.length)
+
+  if(records.length > 0) {
+    const record = records[0];
+    const data = await record.data.json();
+    userProfile.value = { record, data, id: record.id };
+    console.log('User profile is: ', userProfile);
+  }
+
+  else console.log("No profiles found.");
+}
+
+const getUserPreferences = async () => {
+
+  const { records } = await web5.dwn.records.query({
+    message: {
+      filter: {
+        schema: "http://my-website-schema.org/Preferences",
+      }
+    }
+  })
+
+  console.log('Preferences records are: ', records);
+
+  if (records.length > 0) {
+    const record = records[0];
+    const data = await record.data.json();
+    userPreferences.value = { record, data, id: record.id };
+    console.log('User preferences are: ', userPreferences);
+  }
+
+  else console.log("No preferences found.");
+}
+
+const updateProfile = async () => {
+  const userProfileData = {
+    ...userProfile.value,
+  }
+
+  userProfileData.data = { ...userProfileForm.value }
+
+  console.log('User profile data is: ', userProfileData);
+
+  if (Object.keys(userProfile.value).length === 0) {
+    const { record } = await web5.dwn.records.create({
+      data: userProfileData.data,
+      message: {
+        schema: "http://schema.org/Person",
+        dataFormat: "application/json",
+      },
+    });
+
+    console.log('Created profile record is: ', record);
+
+    const data = await record.data.json();
+    userProfile.value = { record, data, id: record.id };
+
+    console.log('Completed User profile is: ', userProfile.value);
+  }
+
+  else {
+    const { record } = await web5.dwn.records.read({
+      message: {
+        filter: {
+          recordId: userProfile.value.id,
+        }
+      }
+    });
+
+    await record.update({ data: userProfileData.data });
+  }
+}
+
+const updatePreferences = async () => {
+  const userPreferencesData = {}
+  userPreferencesData.data = { ...userPreferencesForm.value }
+
+  console.log('User preferences data is: ', userPreferencesData);
+
+  if (Object.keys(userPreferences.value).length === 0) {
+    const { record } = await web5.dwn.records.create({
+      data: userPreferencesData.data,
+      message: {
+        schema: "http://my-website-schema.org/Preferences",
+        dataFormat: "application/json",
+      },
+    });
+
+    console.log('Created user preferences record is: ', record);
+
+    const data = await record.data.json();
+    userPreferences.value = { record, data, id: record.id };
+
+    console.log('Completed User preferences are: ', userPreferences.value);
+  }
+
+  else {
+    const { record } = await web5.dwn.records.read({
+      message: {
+        filter: {
+          recordId: userPreferences.value.id,
+        }
+      }
+    });
+
+    await record.update({ data: userPreferencesData.data });
+  }
+}
+
+const isUserProfileEmpty = computed(() => {
+  return verifyEmptyData(userProfile.value);
+})
+
+const isUserPreferencesEmpty = computed(() => {
+  return verifyEmptyData(userPreferences.value);
+})
+
+const logOut = () => {
+  localStorage.removeItem('web5loggedInUserDID');
+  loggedInUserDID.value = '';
+  userProfile.value = {};
+  userPreferences.value = {};
+}
+
 </script>
